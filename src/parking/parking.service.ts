@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ParkingDto } from './dto/parking.dto';
+import { ParkCreateDto } from './dto/parking-create.dto';
 import { Parking } from './schemas/parking.schema';
 import { v4 as uuidV4 } from 'uuid';
 import { ParkingNotPaidError } from './error/parking_not_paid_error';
@@ -12,7 +12,7 @@ export class ParkingService {
     @InjectModel(Parking.name) private readonly parkModel: Model<Parking>,
   ) {}
 
-  async create(createParkingDto: ParkingDto): Promise<Parking> {
+  async create(createParkingDto: ParkCreateDto): Promise<Parking> {
     const createdPark = new this.parkModel(createParkingDto);
     createdPark.uuid = uuidV4();
     return createdPark.save();

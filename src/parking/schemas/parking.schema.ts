@@ -9,6 +9,8 @@ export class Parking extends Document {
   constructor() {
     super();
     this.uuid = uuidV4();
+    this.left = false;
+    this.paid = false;
   }
 
   @Prop()

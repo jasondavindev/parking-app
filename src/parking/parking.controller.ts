@@ -9,31 +9,78 @@ import {
   Put,
 } from '@nestjs/common';
 import { ParkingService } from './parking.service';
-import { ParkingDto } from './dto/parking.dto';
+import { ParkCreateDto } from './dto/parking-create.dto';
 import { Parking } from './schemas/parking.schema';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
+import { ParkingResponseDto } from './dto/parking-response.dto';
 
+@ApiTags('Parking')
 @Controller('/v1/parking')
 export class ParkingController {
   constructor(private readonly parkingService: ParkingService) {}
 
   @Post()
-  async create(@Body() createParkingDto: ParkingDto) {
-    await this.parkingService.create(createParkingDto);
+  @ApiCreatedResponse({
+    description: 'Parking ticket created',
+    type: ParkingResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid plate',
+  })
+  @ApiOperation({
+    summary: 'Create a new parking ticket',
+  })
+  async create(@Body() parkDto: ParkCreateDto): Promise<ParkingResponseDto> {
+    return this.parkingService.create(parkDto);
   }
 
   @Get('/:plate')
+  @ApiOkResponse({
+    description: 'Parking records',
+    type: [ParkingResponseDto],
+  })
+  @ApiOperation({
+    summary: 'Retrieve parking tickets',
+  })
+  @ApiParam({
+    name: 'plate',
+    description: 'The car plate',
+    example: 'ABC-1234',
+  })
   async findPlateHistory(@Param('plate') plate: string): Promise<Parking[]> {
     return this.parkingService.findByPlate(plate);
   }
 
   @Put('/:uuid/pay')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Pay the parking',
+  })
+  @ApiNoContentResponse({
+    description: 'Parking paid',
+  })
+  @ApiParam({ name: 'uuid', description: 'Record uuid' })
   async payPark(@Param('uuid') uuid: string) {
     await this.parkingService.payParking(uuid);
   }
 
   @Put('/:uuid/out')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Get out of the parking',
+  })
+  @ApiNoContentResponse({
+    description: 'Left parking',
+  })
+  @ApiParam({ name: 'uuid', description: 'Record uuid' })
   async outPark(@Param('uuid') uuid: string) {
     await this.parkingService.checkout(uuid);
   }

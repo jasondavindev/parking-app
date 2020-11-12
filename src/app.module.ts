@@ -1,18 +1,12 @@
-import { resolve } from 'path';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { TerminusModule } from '@nestjs/terminus';
 import { DatabaseModule } from './database/database.module';
 import { ParkingModule } from './parking/parking.module';
-
-const configFilePath = resolve(__dirname, '..', '.env');
+import { HealthController } from './health/health.controller';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ envFilePath: configFilePath, isGlobal: true }),
-    DatabaseModule,
-    ParkingModule,
-  ],
-  controllers: [],
+  imports: [TerminusModule, DatabaseModule, ParkingModule],
+  controllers: [HealthController],
   providers: [],
 })
 export class AppModule {}

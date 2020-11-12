@@ -32,10 +32,11 @@ export class ParkingService {
     return park.save();
   }
 
-  async checkout(uuid: string): Promise<Parking> {
+  async getOut(uuid: string): Promise<Parking> {
     const park = await this.findOneOrThrow({ uuid } as Parking);
     this.checkIfIsPaidOrThrow(park);
-    this.leave(park);
+
+    park.left = true;
 
     await park.save();
 
@@ -47,11 +48,6 @@ export class ParkingService {
 
     if (!park) throw new ParkingNotFoundError();
 
-    return park;
-  }
-
-  private leave(park: Parking): Parking {
-    park.left = true;
     return park;
   }
 

@@ -93,6 +93,6 @@ export class ParkingController {
   })
   @ApiParam({ name: 'uuid', description: 'Record uuid' })
   async outPark(@Param('uuid') uuid: string) {
-    await this.parkingService.checkout(uuid);
+    await this.parkingService.getOut(uuid);
   }
 }

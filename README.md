@@ -4,9 +4,12 @@
 A solução consiste numa API REST, utilizando Node.js 14.x + Nest.js e MongoDB 4.2x.
 
 ### Por que Nest.js?
+
 Para tomar essa decisão, foi levado em conta os requisitos do desafio.
 
 Nest.js tem uma gama de plugins que permite fazer integração direta com MongoDB, através do pacote Mongoose. Além disso, Nest.js tem diversas ferramentas para validação de dados, gerenciamento de erros, e uma opinião de estrutura sólida.
+
+Nest.js por padrão, utiliza TypeScript. O que torna o código melhor documentado e minimiza problemas em runtime.
 
 ## Rodando a aplicação
 

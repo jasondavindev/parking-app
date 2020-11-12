@@ -1,6 +1,20 @@
 version: '3.7'
 
 services:
+  app:
+    container_name: park_app
+    build:
+      dockerfile: Dockerfile
+      context: .
+      args:
+        PORT: 3000
+    image: parking_app
+    env_file: .env
+    depends_on:
+      - db
+    ports:
+      - 3000:3000
+
   db:
     image: mongo:4.2
     container_name: park_app_db

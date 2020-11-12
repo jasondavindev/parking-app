@@ -5,7 +5,12 @@ dotenvConfig({ path: '.env' });
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, HttpStatus } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
+import { HealthController } from '../src/health/health.controller';
+import {
+  closeInMongodConnection,
+  rootMongooseTestModule,
+} from './db-test-setup';
+import { TerminusModule } from '@nestjs/terminus';
 
 dotenvConfig({ path: '.env' });
 
@@ -15,7 +20,8 @@ describe('HealthController (e2e)', () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [rootMongooseTestModule(), TerminusModule],
+      controllers: [HealthController],
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -33,6 +39,7 @@ describe('HealthController (e2e)', () => {
   });
 
   afterAll(async () => {
+    await closeInMongodConnection();
     await app.close();
   });
 });

@@ -9,23 +9,22 @@ import { ParkingNotPaidError } from './error/parking_not_paid_error';
 @Injectable()
 export class ParkingService {
   constructor(
-    @InjectModel(Parking.name) private readonly parkModel: Model<Parking>,
+    @InjectModel(Parking.name) private readonly parkingModel: Model<Parking>,
   ) {}
 
   async create(createParkingDto: ParkCreateDto): Promise<Parking> {
-    const createdPark = new this.parkModel(createParkingDto);
-    createdPark.uuid = uuidV4();
+    const createdPark = new this.parkingModel(createParkingDto);
     return createdPark.save();
   }
 
   async findByPlate(plate: string): Promise<Parking[]> {
-    return this.parkModel
+    return this.parkingModel
       .find({ plate }, { _id: 0, __v: 0 })
       .sort({ createdAt: -1 });
   }
 
   async payParking(uuid: string): Promise<Parking> {
-    return this.parkModel.updateOne(
+    return this.parkingModel.updateOne(
       { uuid },
       {
         paid: true,
@@ -34,7 +33,7 @@ export class ParkingService {
   }
 
   async checkout(uuid: string): Promise<Parking> {
-    const park = await this.parkModel.findOne({ uuid });
+    const park = await this.parkingModel.findOne({ uuid });
     this.checkIfIsPaidOrThrow(park);
     this.leaveParking(park);
 

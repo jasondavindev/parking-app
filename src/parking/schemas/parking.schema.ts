@@ -1,8 +1,22 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { v4 as uuidV4 } from 'uuid';
 
-@Schema()
+@Schema({
+  timestamps: true,
+})
 export class Parking extends Document {
+  constructor() {
+    super();
+    this.uuid = uuidV4();
+  }
+
+  @Prop()
+  plate: string;
+
+  @Prop()
+  uuid: string;
+
   @Prop()
   time: string;
 

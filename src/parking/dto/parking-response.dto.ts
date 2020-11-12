@@ -19,8 +19,8 @@ export class ParkingResponseDto {
   readonly paid: boolean;
 
   @ApiProperty({
-    description: 'ISO date creation',
-    example: '2020-01-01T12:00:00.00Z',
+    description: 'Parking time',
+    example: '10 minutes',
   })
-  readonly createdAt?: string;
+  readonly time: string;
 }

@@ -3,8 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ParkCreateDto } from './dto/parking-create.dto';
 import { Parking } from './schemas/parking.schema';
-import { v4 as uuidV4 } from 'uuid';
-import { ParkingNotPaidError } from './error/parking_not_paid_error';
+import { ParkingNotPaidError } from './errors/parking_not_paid.error';
+import { ParkingNotFoundError } from './errors/parking_not_found.error';
+import { AlreadyParkedError } from './errors/already_parked.error';
 
 @Injectable()
 export class ParkingService {
@@ -13,6 +14,8 @@ export class ParkingService {
   ) {}
 
   async create(createParkingDto: ParkCreateDto): Promise<Parking> {
+    await this.throwsIfIsInParking(createParkingDto.plate);
+
     const createdPark = new this.parkingModel(createParkingDto);
     return createdPark.save();
   }
@@ -23,26 +26,31 @@ export class ParkingService {
       .sort({ createdAt: -1 });
   }
 
-  async payParking(uuid: string): Promise<Parking> {
-    return this.parkingModel.updateOne(
-      { uuid },
-      {
-        paid: true,
-      },
-    );
+  async pay(uuid: string): Promise<Parking> {
+    const park = await this.findOneOrThrow({ uuid } as Parking);
+    park.paid = true;
+    return park.save();
   }
 
   async checkout(uuid: string): Promise<Parking> {
-    const park = await this.parkingModel.findOne({ uuid });
+    const park = await this.findOneOrThrow({ uuid } as Parking);
     this.checkIfIsPaidOrThrow(park);
-    this.leaveParking(park);
+    this.leave(park);
 
     await park.save();
 
     return park;
   }
 
-  private leaveParking(park: Parking): Parking {
+  async findOneOrThrow(options: Parking) {
+    const park = await this.parkingModel.findOne(options);
+
+    if (!park) throw new ParkingNotFoundError();
+
+    return park;
+  }
+
+  private leave(park: Parking): Parking {
     park.left = true;
     return park;
   }
@@ -51,5 +59,20 @@ export class ParkingService {
     if (!park?.paid) {
       throw new ParkingNotPaidError();
     }
+  }
+
+  private async throwsIfIsInParking(plate: string): Promise<void> {
+    const isInParking = await this.checkIfAlreadyIsInParking(plate);
+
+    if (isInParking) throw new AlreadyParkedError();
+  }
+
+  private async checkIfAlreadyIsInParking(plate: string): Promise<boolean> {
+    const [park] = await this.parkingModel
+      .find({ plate })
+      .sort({ createdAt: -1 })
+      .limit(1);
+
+    return park?.left === false;
   }
 }

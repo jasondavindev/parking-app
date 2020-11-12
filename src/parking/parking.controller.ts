@@ -13,8 +13,10 @@ import { ParkCreateDto } from './dto/parking-create.dto';
 import { Parking } from './schemas/parking.schema';
 import {
   ApiBadRequestResponse,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiNoContentResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -34,6 +36,9 @@ export class ParkingController {
   })
   @ApiBadRequestResponse({
     description: 'Invalid plate',
+  })
+  @ApiConflictResponse({
+    description: 'Parking already parked',
   })
   @ApiOperation({
     summary: 'Create a new parking ticket',
@@ -67,9 +72,12 @@ export class ParkingController {
   @ApiNoContentResponse({
     description: 'Parking paid',
   })
+  @ApiNotFoundResponse({
+    description: 'Parking ticket not found',
+  })
   @ApiParam({ name: 'uuid', description: 'Record uuid' })
   async payPark(@Param('uuid') uuid: string) {
-    await this.parkingService.payParking(uuid);
+    await this.parkingService.pay(uuid);
   }
 
   @Put('/:uuid/out')
@@ -79,6 +87,9 @@ export class ParkingController {
   })
   @ApiNoContentResponse({
     description: 'Left parking',
+  })
+  @ApiNotFoundResponse({
+    description: 'Parking ticket not found',
   })
   @ApiParam({ name: 'uuid', description: 'Record uuid' })
   async outPark(@Param('uuid') uuid: string) {

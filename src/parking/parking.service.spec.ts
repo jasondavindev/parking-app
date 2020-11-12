@@ -5,6 +5,7 @@ import { ParkingService } from './parking.service';
 import { AlreadyParkedError } from './errors/already_parked.error';
 import { ParkingNotFoundError } from './errors/parking_not_found.error';
 import { ParkingNotPaidError } from './errors/parking_not_paid.error';
+import { Parking } from './schemas/parking.schema';
 
 describe('ParkingService', () => {
   let parkingService: ParkingService;
@@ -21,7 +22,7 @@ describe('ParkingService', () => {
       providers: [
         ParkingService,
         {
-          provide: getModelToken('Parking'),
+          provide: getModelToken(Parking.name),
           useValue: mockParkingModel,
         },
       ],

@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
-import { DatabaseModule } from './database/database.module';
 import { ParkingModule } from './parking/parking.module';
 import { HealthController } from './health/health.controller';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-  imports: [TerminusModule, DatabaseModule, ParkingModule],
+  imports: [
+    MongooseModule.forRoot(process.env.MONGO_URI),
+    TerminusModule,
+    ParkingModule,
+  ],
   controllers: [HealthController],
   providers: [],
 })

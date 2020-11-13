@@ -6,18 +6,20 @@ import { Parking } from './schemas/parking.schema';
 import { ParkingNotPaidError } from './errors/parking_not_paid.error';
 import { ParkingNotFoundError } from './errors/parking_not_found.error';
 import { AlreadyParkedError } from './errors/already_parked.error';
+import { PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class ParkingService {
   constructor(
     @InjectModel(Parking.name) private readonly parkingModel: Model<Parking>,
+    private readonly logger: PinoLogger,
   ) {}
 
   async create(createParkingDto: ParkCreateDto): Promise<Parking> {
     await this.throwsIfIsInParking(createParkingDto.plate);
 
-    const createdPark = new this.parkingModel(createParkingDto);
-    return createdPark.save();
+    const createdParkingTicket = new this.parkingModel(createParkingDto);
+    return createdParkingTicket.save();
   }
 
   async findByPlate(plate: string): Promise<Parking[]> {
@@ -27,32 +29,35 @@ export class ParkingService {
   }
 
   async pay(uuid: string): Promise<Parking> {
-    const park = await this.findOneOrThrow({ uuid } as Parking);
-    park.paid = true;
-    return park.save();
+    const parkingTicket = await this.findOneOrThrow({ uuid } as Parking);
+    parkingTicket.paid = true;
+    return parkingTicket.save();
   }
 
   async getOut(uuid: string): Promise<Parking> {
-    const park = await this.findOneOrThrow({ uuid } as Parking);
-    this.checkIfIsPaidOrThrow(park);
+    const parkingTicket = await this.findOneOrThrow({ uuid } as Parking);
+    this.checkIfIsPaidOrThrow(parkingTicket);
 
-    park.left = true;
+    parkingTicket.left = true;
 
-    await park.save();
+    await parkingTicket.save();
 
-    return park;
+    return parkingTicket;
   }
 
   async findOneOrThrow(options: Parking) {
-    const park = await this.parkingModel.findOne(options);
+    const parkTicker = await this.parkingModel.findOne(options);
 
-    if (!park) throw new ParkingNotFoundError();
+    if (!parkTicker) throw new ParkingNotFoundError();
 
-    return park;
+    return parkTicker;
   }
 
-  private checkIfIsPaidOrThrow(park: Parking) {
-    if (!park?.paid) {
+  private checkIfIsPaidOrThrow(parking: Parking) {
+    if (!parking.paid) {
+      this.logger.error(
+        `ParkingService#checkIfIsPaidOrThrow - Parking uuid=${parking.uuid}`,
+      );
       throw new ParkingNotPaidError();
     }
   }
@@ -60,7 +65,12 @@ export class ParkingService {
   private async throwsIfIsInParking(plate: string): Promise<void> {
     const isInParking = await this.checkIfAlreadyIsInParking(plate);
 
-    if (isInParking) throw new AlreadyParkedError();
+    if (isInParking) {
+      this.logger.error(
+        `ParkingService#throwsIfIsInParking - Try to create new parking ticket plate=(${plate})`,
+      );
+      throw new AlreadyParkedError();
+    }
   }
 
   private async checkIfAlreadyIsInParking(plate: string): Promise<boolean> {

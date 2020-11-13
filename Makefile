@@ -1,9 +1,6 @@
 USER_SH=$(shell id -u ${USER})
 GROUP_SH=$(shell id -g ${USER})
 
-db/connect:
-	docker exec -ti park_app_db mongo -u user_app -p password --authenticationDatabase park_db
-
 dkbuild:
 	docker-compose build
 
@@ -34,6 +31,11 @@ test:
 	docker run --rm -it \
 	-v ${PWD}:/app \
 	-w /app node:14-alpine sh -c "yarn test"
+
+test/cov:
+	docker run --rm -it \
+	-v ${PWD}:/app \
+	-w /app node:14-alpine sh -c "yarn test:cov"
 
 # localmente devido a permissoes
 test/e2e:

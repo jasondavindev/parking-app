@@ -8,6 +8,8 @@ import {
   closeInMongodConnection,
   rootMongooseTestModule,
 } from './db-test-setup';
+import { LoggerModule } from 'nestjs-pino';
+import loggerConfig from '../src/common/logger.config';
 
 describe('ParkingController (e2e)', () => {
   const path = '/v1/parking';
@@ -17,7 +19,11 @@ describe('ParkingController (e2e)', () => {
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
-      imports: [rootMongooseTestModule(), ParkingModule],
+      imports: [
+        rootMongooseTestModule(),
+        LoggerModule.forRoot(loggerConfig),
+        ParkingModule,
+      ],
     }).compile();
 
     app = module.createNestApplication();

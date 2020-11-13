@@ -56,12 +56,6 @@ Devido a algumas limitações (alguns binários do mongo em memória), este coma
 make test/e2e
 ```
 
-## Rodando cobertura de testes
-
-```bash
-make test/cov
-```
-
 ## E as rotas?
 
 Todas as rotas estão documentadas utilizando [Swagger](https://swagger.io/). Basta acessar a rota `/api-docs` da aplicação. Ex: http://localhost:3000/api-docs.

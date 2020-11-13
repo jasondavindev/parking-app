@@ -6,6 +6,8 @@ import { AlreadyParkedError } from './errors/already_parked.error';
 import { ParkingNotFoundError } from './errors/parking_not_found.error';
 import { ParkingNotPaidError } from './errors/parking_not_paid.error';
 import { Parking } from './schemas/parking.schema';
+import { LoggerModule } from 'nestjs-pino';
+import loggerConfig from '../common/logger.config';
 
 describe('ParkingService', () => {
   let parkingService: ParkingService;
@@ -19,6 +21,7 @@ describe('ParkingService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [LoggerModule.forRoot(loggerConfig)],
       providers: [
         ParkingService,
         {

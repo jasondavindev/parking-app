@@ -6,8 +6,9 @@ import * as helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/http-exception.filter';
+import { GlobalExceptionFilter } from './common/global-exception.filter';
 import swaggerConfigure from './common/swagger.config';
+import { Logger } from 'nestjs-pino';
 
 const { PORT = 3000 } = process.env;
 
@@ -17,7 +18,7 @@ async function bootstrap() {
   app.use(helmet());
   app
     .useGlobalPipes(new ValidationPipe({ transform: true }))
-    .useGlobalFilters(new HttpExceptionFilter());
+    .useGlobalFilters(new GlobalExceptionFilter(app.get(Logger)));
 
   swaggerConfigure(app);
 

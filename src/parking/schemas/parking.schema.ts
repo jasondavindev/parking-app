@@ -10,7 +10,7 @@ export class Parking extends Document {
   createdAt?: Date;
 }
 
-export const ParkingSchema = new Schema(
+export const ParkingSchema = new Schema<Parking>(
   {
     plate: String,
     uuid: { type: String, default: uuidV4() },
@@ -23,7 +23,7 @@ export const ParkingSchema = new Schema(
       transform: (doc: Parking, ret: Parking) => {
         const currentTime = new Date();
         const runningTime = Math.round(
-          (currentTime.getTime() - doc.createdAt?.getTime()) / 1000 / 60,
+          (currentTime.getTime() - doc.createdAt.getTime()) / 1000 / 60,
         );
 
         ret.time = `${runningTime} minutes`;

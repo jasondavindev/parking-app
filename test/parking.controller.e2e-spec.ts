@@ -10,6 +10,7 @@ import {
 } from './db-test-setup';
 import { LoggerModule } from 'nestjs-pino';
 import loggerConfig from '../src/common/logger.config';
+import { validParkingMock } from '../src/__mocks__/parking';
 
 describe('ParkingController (e2e)', () => {
   const path = '/v1/parking';
@@ -33,11 +34,9 @@ describe('ParkingController (e2e)', () => {
   });
 
   it('should create a parking ticket', () => {
-    const parking = { plate: 'ABC-2234' };
-
     return request(server)
       .post(path)
-      .send(parking)
+      .send(validParkingMock)
       .expect(HttpStatus.CREATED)
       .expect((response: request.Response) => {
         expect(response.body).toHaveProperty('uuid');
@@ -45,30 +44,29 @@ describe('ParkingController (e2e)', () => {
   });
 
   it('should return Conflict error when already exists a record that is in the parking', async () => {
-    const parking = { plate: 'ABC-2234' };
+    await parkingService.create(validParkingMock);
 
-    await parkingService.create(parking);
-
-    return request(server).post(path).send(parking).expect(HttpStatus.CONFLICT);
+    return request(server)
+      .post(path)
+      .send(validParkingMock)
+      .expect(HttpStatus.CONFLICT);
   });
 
   it('should return the parking ticket', async () => {
-    const parking = { plate: 'ABC-2234' };
-
-    await parkingService.create(parking);
+    await parkingService.create(validParkingMock);
 
     return request(server)
-      .get(`${path}/${parking.plate}`)
+      .get(`${path}/${validParkingMock.plate}`)
       .expect(HttpStatus.OK)
       .expect((response: request.Response) => {
         expect(response.body).toHaveLength(1);
         expect(response.body[0]).toHaveProperty('uuid');
-        expect(response.body[0].plate).toEqual(parking.plate);
+        expect(response.body[0].plate).toEqual(validParkingMock.plate);
       });
   });
 
   it('should update payment status', async () => {
-    const parking = await parkingService.create({ plate: 'ABC-2234' });
+    const parking = await parkingService.create(validParkingMock);
 
     return request(server)
       .put(`${path}/${parking.uuid}/pay`)
@@ -82,7 +80,7 @@ describe('ParkingController (e2e)', () => {
   });
 
   it('should update "left" status', async () => {
-    const parking = await parkingService.create({ plate: 'ABC-2234' });
+    const parking = await parkingService.create(validParkingMock);
     await parkingService.pay(parking.uuid);
 
     return request(server)
@@ -91,7 +89,7 @@ describe('ParkingController (e2e)', () => {
   });
 
   it('should return CONFLICT error when parking ticket is not paid', async () => {
-    const parking = await parkingService.create({ plate: 'ABC-2234' });
+    const parking = await parkingService.create(validParkingMock);
 
     return request(server)
       .put(`${path}/${parking.uuid}/out`)
